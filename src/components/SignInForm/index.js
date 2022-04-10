@@ -1,23 +1,66 @@
+import { useState } from "react";
+
+import { signIn } from "../../services/api";
+
 import "./styles.css";
 
 const SignInForm = () => { 
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [isSignedIn, setIsSignedIn] = useState(false);
+
+
+    const handleFormSubmit = async (event) => { 
+        event.preventDefault();
+
+        setIsLoading(true);
+        try {
+            await signIn({ username, password });
+            setIsSignedIn(true);
+            setError("");
+            setUsername("");
+            setPassword("");
+        } catch (error) { 
+            setError("Usuário ou senha inválidos");
+        }
+        
+        setIsLoading(false);
+
+    }
     return (
         <main>
-            <form>
-                <h1>Autenticação</h1>
-                <p className="error">Usuário ou senha inválidos</p>
-                <label>
-                    <p>Nome de Usuário</p>
-                    <input type="text"/>    
-                </label>
-                <label>
-                    <p>Senha</p>
-                    <input type="password"/>    
-                </label>
-                <footer>
-                    <button type="submit">Entrar</button>
-                </footer>
-            </form>
+            {isSignedIn ? (
+                <>
+                    <h1>Ola, {username}</h1>
+                    <button onClick={() => setIsSignedIn(false)}>Sair</button>
+                </>
+            ) : (
+                <form onSubmit={handleFormSubmit}>
+                    <h1>Autenticação</h1>
+                    { error && <p className="error">{ error}</p>}
+                    <label>
+                        <p>Nome de Usuário</p>
+                        <input type="text"
+                            value={username}
+                            onChange={({target}) => setUsername(target.value)}
+                        />    
+                    </label>
+                    <label>
+                        <p>Senha</p>
+                        <input type="password"
+                            value={password}
+                            onChange={({target}) => setPassword(target.value)}
+                        />    
+                    </label>
+                    <footer>
+                        <button type="submit" disabled={isLoading}>
+                            {isLoading ? "Autenticando" : "Entrar"} 
+                        </button>
+                    </footer>
+                </form >
+            )};
       </main>  
     );
 
